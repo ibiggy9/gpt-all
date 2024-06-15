@@ -1,2 +1,4 @@
 
 myenv/
+.env
+push_to_cloud.py
