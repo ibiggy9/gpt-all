@@ -2,7 +2,6 @@ from fastapi import FastAPI, Request, HTTPException, Depends
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 import httpx
-from openai import OpenAI
 from anthropic import Anthropic
 from typing import List
 import random
@@ -16,6 +15,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import re
 from dotenv import load_dotenv
 import os
+
 
 load_dotenv()  # Load environment variables from .env file
 
@@ -68,13 +68,7 @@ async def knowledgeResponse(conversation: List[Message]):
             messages=conversation)
     
 
-    #Broken, client needs to pass object without system role
-    '''
-    completion = client.chat.completions.create(
-        model="gpt-4o-2024-05-13",
-        messages=conversation
-    )
-    '''
+
     claude_response = completion.content[0].text
     return claude_response
 
@@ -127,12 +121,6 @@ async def getFleurResponse(conversation: List[Message], token: str = Depends(get
             max_tokens=300,
             messages=conversation)
 
-    '''
-    completion = client.chat.completions.create(
-        model="gpt-4o-2024-05-13",
-        messages=conversation
-    )
-    '''
     claude_response = completion.content[0].text
     return claude_response
 
