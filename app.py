@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 import httpx
 from openai import OpenAI
+from anthropic import Anthropic
 from typing import List
 import random
 from urllib.parse import urlparse
@@ -18,8 +19,8 @@ import os
 
 load_dotenv()  # Load environment variables from .env file
 
-key = os.getenv("OPENAI_API_KEY")
-client = OpenAI(api_key=key)
+key = os.getenv("API_KEY")
+client = Anthropic(api_key=key)
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
 security = HTTPBearer()
@@ -60,11 +61,22 @@ async def protected_endpoint(token: str = Depends(get_current_device)):
 @app.post("/gpt/knowledgeBase")
 async def knowledgeResponse(conversation: List[Message]):
     print(conversation)
+
+    completion = client.messages.create(
+            model="claude-3-5-sonnet-20240620",
+            max_tokens=1000,
+            messages=conversation)
+    
+
+    #Broken, client needs to pass object without system role
+    '''
     completion = client.chat.completions.create(
         model="gpt-4o-2024-05-13",
         messages=conversation
     )
-    return completion.choices[0].message
+    '''
+    claude_response = completion.content[0].text
+    return claude_response
 
 @app.post("/heartbeat")
 async def get_token(request: DeviceIDRequest):
@@ -110,11 +122,19 @@ async def getFleurResponse(conversation: List[Message], token: str = Depends(get
     print({"message": f"Access granted for device {token}"})
     
     print(conversation)
+    completion = client.messages.create(
+            model="claude-3-5-sonnet-20240620",
+            max_tokens=300,
+            messages=conversation)
+
+    '''
     completion = client.chat.completions.create(
         model="gpt-4o-2024-05-13",
         messages=conversation
     )
-    return completion
+    '''
+    claude_response = completion.content[0].text
+    return claude_response
 
 if __name__ == "__main__":
     import uvicorn
