@@ -119,7 +119,8 @@ async def getFleurResponse(conversation: List[Message], token: str = Depends(get
     completion = client.messages.create(
             model="claude-3-5-sonnet-20240620",
             max_tokens=300,
-            messages=conversation)
+            system=conversation[0].content,
+            messages=conversation[1:])
 
     claude_response = completion.content[0].text
     return claude_response
