@@ -115,15 +115,26 @@ async def getFleurResponse(conversation: List[Message], token: str = Depends(get
     print(token)
     print({"message": f"Access granted for device {token}"})
     
-    print(conversation)
+    system_string = conversation[0].content + conversation[1].content
     completion = client.messages.create(
             model="claude-3-5-sonnet-20240620",
-            max_tokens=300,
-            system=conversation[0].content,
-            messages=conversation[1:])
-
+            max_tokens=1000,
+            system=system_string,
+            messages=conversation[2:])
+    #Note to self, this is just a creative workaround so I could remap the anthropic api to openai's
+    #spec so I didn't have to rerun builds with Apple. 
     claude_response = completion.content[0].text
-    return claude_response
+    response_object = {"choices":
+                       [
+                           {
+                               "message":{
+                                   "content":claude_response
+                                   }
+                           }
+                        ]
+                    }
+    print(claude_response)
+    return response_object
 
 if __name__ == "__main__":
     import uvicorn
