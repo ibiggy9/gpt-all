@@ -88,11 +88,13 @@ async def get_audio_size(link: str, bitrate: int = 190):
     try:
         parsed_url = urlparse(link)
         domain = parsed_url.netloc
+        custom_agent = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.6533.103 Mobile Safari/537.36"
 
         ydl_opts = {
             'format': 'bestaudio/best',
             'noplaylist': True,
             'playlistend': 1,
+            'user_agent': custom_agent
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -115,26 +117,15 @@ async def getFleurResponse(conversation: List[Message], token: str = Depends(get
     print(token)
     print({"message": f"Access granted for device {token}"})
     
-    system_string = conversation[0].content + conversation[1].content
+    print(conversation)
     completion = client.messages.create(
             model="claude-3-5-sonnet-20240620",
-            max_tokens=1000,
-            system=system_string,
-            messages=conversation[2:])
-    #Note to self, this is just a creative workaround so I could remap the anthropic api to openai's
-    #spec so I didn't have to rerun builds with Apple. 
+            max_tokens=300,
+            system=conversation[0].content,
+            messages=conversation[1:])
+
     claude_response = completion.content[0].text
-    response_object = {"choices":
-                       [
-                           {
-                               "message":{
-                                   "content":claude_response
-                                   }
-                           }
-                        ]
-                    }
-    print(claude_response)
-    return response_object
+    return claude_response
 
 if __name__ == "__main__":
     import uvicorn
